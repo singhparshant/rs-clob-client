@@ -1,3 +1,8 @@
+#![allow(clippy::exhaustive_enums, reason = "Fine for examples")]
+#![allow(clippy::exhaustive_structs, reason = "Fine for examples")]
+#![allow(clippy::unwrap_used, reason = "Fine for examples")]
+#![allow(clippy::print_stdout, reason = "Examples are okay to print to stdout")]
+#![allow(clippy::print_stderr, reason = "Examples are okay to print to stderr")]
 //! Example demonstrating market WebSocket usage for real-time order book updates
 //!
 //! This example shows how to connect to the market WebSocket and subscribe to

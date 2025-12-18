@@ -1,3 +1,8 @@
+#![allow(clippy::exhaustive_enums, reason = "Fine for examples")]
+#![allow(clippy::exhaustive_structs, reason = "Fine for examples")]
+#![allow(clippy::unwrap_used, reason = "Fine for examples")]
+#![allow(clippy::print_stdout, reason = "Examples are okay to print to stdout")]
+#![allow(clippy::print_stderr, reason = "Examples are okay to print to stderr")]
 //! Example demonstrating user WebSocket usage for authenticated user events
 //!
 //! This example shows how to connect to the user WebSocket to receive real-time
@@ -8,7 +13,7 @@
 //! POLYMARKET_PRIVATE_KEY=<your_private_key> cargo run --example websocket_user
 //! ```
 
-use std::str::FromStr;
+use std::str::FromStr as _;
 
 use alloy::signers::Signer as _;
 use alloy::signers::local::LocalSigner;
@@ -57,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
 
                 match message {
                     UserWebSocketMessage::Trade(trade) => {
-                        println!("[{}] Trade Event:", message_count);
+                        println!("[{message_count}] Trade Event:");
                         println!("  Trade ID: {}", trade.id);
                         println!("  Order ID: {}", trade.order_id);
                         println!("  Market: {}", trade.market);
@@ -74,7 +79,7 @@ async fn main() -> anyhow::Result<()> {
                             STATUS_MATCHED => {
                                 println!("  ✓ Trade matched!");
                                 if let Some(match_time) = trade.match_time {
-                                    println!("    Match time: {}", match_time);
+                                    println!("    Match time: {match_time}");
                                 }
                             }
                             STATUS_MINED => {
@@ -87,13 +92,13 @@ async fn main() -> anyhow::Result<()> {
                         }
 
                         if let Some(trader_side) = trade.trader_side {
-                            println!("  Trader Side: {}", trader_side);
+                            println!("  Trader Side: {trader_side}");
                         }
 
                         println!();
                     }
                     UserWebSocketMessage::Order(order) => {
-                        println!("[{}] Order Event:", message_count);
+                        println!("[{message_count}] Order Event:");
                         println!("  Order ID: {}", order.id);
                         println!("  Message Type: {}", order.msg_type);
                         println!("  Market: {}", order.market);
@@ -103,11 +108,11 @@ async fn main() -> anyhow::Result<()> {
                         println!("  Original Size: {}", order.original_size);
 
                         if let Some(size_matched) = &order.size_matched {
-                            println!("  Size Matched: {}", size_matched);
+                            println!("  Size Matched: {size_matched}");
                         }
 
                         if let Some(order_type) = &order.order_type {
-                            println!("  Order Type: {}", order_type);
+                            println!("  Order Type: {order_type}");
                         }
 
                         println!("  Timestamp: {}", order.timestamp);
@@ -129,17 +134,17 @@ async fn main() -> anyhow::Result<()> {
                         println!();
                     }
                     UserWebSocketMessage::Unknown => {
-                        println!("[{}] Unknown message type", message_count);
+                        println!("[{message_count}] Unknown message type");
                         println!();
                     }
                     _ => {
-                        println!("[{}] Unhandled message type", message_count);
+                        println!("[{message_count}] Unhandled message type");
                         println!();
                     }
                 }
             }
             Err(e) => {
-                eprintln!("Error receiving message: {}", e);
+                eprintln!("Error receiving message: {e}");
             }
         }
     }
