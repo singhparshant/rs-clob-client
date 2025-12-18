@@ -15,15 +15,15 @@
 //! async fn main() -> anyhow::Result<()> {
 //!     let client = Client::new("https://clob.polymarket.com", Config::default())?;
 //!     let mut ws = client.market_websocket().await?;
-//!     
+//!
 //!     // Subscribe to market updates for specific assets
 //!     ws.subscribe(&["asset_id_1", "asset_id_2"]).await?;
-//!     
+//!
 //!     // Receive messages
 //!     while let Some(msg) = ws.next().await {
 //!         println!("Received: {:?}", msg);
 //!     }
-//!     
+//!
 //!     Ok(())
 //! }
 //! ```
@@ -42,19 +42,19 @@
 //! async fn main() -> anyhow::Result<()> {
 //!     let client = Client::new("https://clob.polymarket.com", Config::default())?;
 //!     let signer = LocalSigner::from_str("private_key")?;
-//!     
+//!
 //!     let authenticated_client = client
 //!         .authentication_builder(&signer)
 //!         .authenticate()
 //!         .await?;
-//!     
+//!
 //!     let mut ws = authenticated_client.user_websocket().await?;
-//!     
+//!
 //!     // Receive user events
 //!     while let Some(msg) = ws.next().await {
 //!         println!("Received: {:?}", msg);
 //!     }
-//!     
+//!
 //!     Ok(())
 //! }
 //! ```
@@ -62,7 +62,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures_util::{SinkExt, StreamExt, stream::SplitSink, stream::SplitStream};
+use futures_util::{SinkExt as _, StreamExt as _, stream::SplitSink, stream::SplitStream};
 use serde_json::json;
 use tokio::net::TcpStream;
 use tokio::sync::Mutex;
@@ -188,7 +188,7 @@ impl MarketWebSocket {
                 Some(Ok(Message::Text(text))) => {
                     drop(reader);
 
-                    match self.parse_market_messages(&text) {
+                    match Self::parse_market_messages(&text) {
                         Ok(msgs) => return Some(Ok(msgs)),
                         Err(e) => return Some(Err(e)),
                     }
@@ -197,29 +197,13 @@ impl MarketWebSocket {
                     drop(reader);
                     let mut writer = self.writer.lock().await;
                     if let Some(ws) = writer.as_mut() {
-                        let _ = ws.send(Message::Pong(data)).await;
+                        _ = ws.send(Message::Pong(data)).await;
                     }
                 }
-                Some(Ok(Message::Close(_))) => {
+                Some(Ok(Message::Close(_)) | Err(_)) | None => {
                     drop(reader);
                     if self.auto_reconnect {
-                        let _ = self.reconnect().await;
-                        continue;
-                    }
-                    return None;
-                }
-                Some(Err(_)) => {
-                    drop(reader);
-                    if self.auto_reconnect {
-                        let _ = self.reconnect().await;
-                        continue;
-                    }
-                    return None;
-                }
-                None => {
-                    drop(reader);
-                    if self.auto_reconnect {
-                        let _ = self.reconnect().await;
+                        _ = self.reconnect().await;
                         continue;
                     }
                     return None;
@@ -265,7 +249,7 @@ impl MarketWebSocket {
                     let subscribed = self.subscribed_assets.lock().await.clone();
                     if !subscribed.is_empty() {
                         let refs: Vec<&str> = subscribed.iter().map(String::as_str).collect();
-                        let _ = self.subscribe(&refs).await;
+                        _ = self.subscribe(&refs).await;
                     }
 
                     return Ok(());
@@ -277,7 +261,7 @@ impl MarketWebSocket {
         }
     }
 
-    fn parse_market_messages(&self, text: &str) -> Result<Vec<MarketWebSocketMessage>> {
+    fn parse_market_messages(text: &str) -> Result<Vec<MarketWebSocketMessage>> {
         debug!(message = %text, "market websocket message received");
 
         let value: serde_json::Value = serde_json::from_str(text)
@@ -386,7 +370,7 @@ impl UserWebSocket {
                 Some(Ok(Message::Text(text))) => {
                     drop(reader);
 
-                    match self.parse_user_message(&text) {
+                    match Self::parse_user_message(&text) {
                         Ok(msg) => return Some(Ok(msg)),
                         Err(e) => return Some(Err(e)),
                     }
@@ -395,29 +379,13 @@ impl UserWebSocket {
                     drop(reader);
                     let mut writer = self.writer.lock().await;
                     if let Some(ws) = writer.as_mut() {
-                        let _ = ws.send(Message::Pong(data)).await;
+                        _ = ws.send(Message::Pong(data)).await;
                     }
                 }
-                Some(Ok(Message::Close(_))) => {
+                Some(Ok(Message::Close(_)) | Err(_)) | None => {
                     drop(reader);
                     if self.auto_reconnect {
-                        let _ = self.reconnect().await;
-                        continue;
-                    }
-                    return None;
-                }
-                Some(Err(_)) => {
-                    drop(reader);
-                    if self.auto_reconnect {
-                        let _ = self.reconnect().await;
-                        continue;
-                    }
-                    return None;
-                }
-                None => {
-                    drop(reader);
-                    if self.auto_reconnect {
-                        let _ = self.reconnect().await;
+                        _ = self.reconnect().await;
                         continue;
                     }
                     return None;
@@ -487,7 +455,7 @@ impl UserWebSocket {
         }
     }
 
-    fn parse_user_message(&self, text: &str) -> Result<UserWebSocketMessage> {
+    fn parse_user_message(text: &str) -> Result<UserWebSocketMessage> {
         serde_json::from_str(text)
             .map_err(|e| Error::validation(format!("Failed to parse user message: {e}")))
     }
@@ -499,8 +467,9 @@ mod tests {
 
     #[test]
     fn constants_should_be_defined() {
-        assert!(!DEFAULT_MARKET_WS_URL.is_empty());
-        assert!(!DEFAULT_USER_WS_URL.is_empty());
+        // These are compile-time constants; clippy will flag `is_empty()` checks here.
+        assert_ne!(DEFAULT_MARKET_WS_URL, "");
+        assert_ne!(DEFAULT_USER_WS_URL, "");
         assert_eq!(MAX_BACKOFF_SECS, 30);
         assert_eq!(INITIAL_BACKOFF_SECS, 1);
     }

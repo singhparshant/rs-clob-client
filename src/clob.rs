@@ -832,13 +832,13 @@ impl Client<Unauthenticated> {
     /// async fn main() -> anyhow::Result<()> {
     ///     let client = Client::new("https://clob.polymarket.com", Config::default())?;
     ///     let mut ws = client.market_websocket().await?;
-    ///     
+    ///
     ///     ws.subscribe(&["asset_id_1", "asset_id_2"]).await?;
-    ///     
+    ///
     ///     while let Some(msg) = ws.next().await {
     ///         println!("Market update: {:?}", msg);
     ///     }
-    ///     
+    ///
     ///     Ok(())
     /// }
     /// ```
@@ -1344,18 +1344,18 @@ impl<K: AuthKind> Client<Authenticated<K>> {
     /// async fn main() -> anyhow::Result<()> {
     ///     let client = Client::new("https://clob.polymarket.com", Config::default())?;
     ///     let signer = LocalSigner::from_str("private_key")?;
-    ///     
+    ///
     ///     let authenticated_client = client
     ///         .authentication_builder(&signer)
     ///         .authenticate()
     ///         .await?;
-    ///     
+    ///
     ///     let mut ws = authenticated_client.user_websocket().await?;
-    ///     
+    ///
     ///     while let Some(msg) = ws.next().await {
     ///         println!("User event: {:?}", msg);
     ///     }
-    ///     
+    ///
     ///     Ok(())
     /// }
     /// ```

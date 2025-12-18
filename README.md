@@ -270,15 +270,15 @@ use polymarket_client_sdk::clob::{Client, Config};
 async fn main() -> anyhow::Result<()> {
     let client = Client::new("https://clob.polymarket.com", Config::default())?;
     let mut ws = client.market_websocket().await?;
-    
+
     // Subscribe to specific assets
     ws.subscribe(&["asset_id_1", "asset_id_2"]).await?;
-    
+
     // Receive updates
     while let Some(msg) = ws.next().await {
         println!("Market update: {:?}", msg);
     }
-    
+
     Ok(())
 }
 ```
@@ -300,19 +300,19 @@ use polymarket_client_sdk::{POLYGON, PRIVATE_KEY_VAR};
 async fn main() -> anyhow::Result<()> {
     let private_key = std::env::var(PRIVATE_KEY_VAR)?;
     let signer = LocalSigner::from_str(&private_key)?.with_chain_id(Some(POLYGON));
-    
+
     let client = Client::new("https://clob.polymarket.com", Config::default())?
         .authentication_builder(&signer)
         .authenticate()
         .await?;
-    
+
     let mut ws = client.user_websocket().await?;
-    
+
     // Receive user events
     while let Some(msg) = ws.next().await {
         println!("User event: {:?}", msg);
     }
-    
+
     Ok(())
 }
 ```

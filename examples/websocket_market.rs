@@ -26,13 +26,13 @@ async fn main() -> anyhow::Result<()> {
     println!("Connected to market WebSocket");
 
     // Example asset IDs - replace with actual asset IDs you want to monitor
-    let asset_ids = vec![
+    let asset_ids = [
         "51338236787729560681434534660841415073585974762690814047670810862722808070955",
         // "18289842382539867639079362738467334752951741961393928566628307174343542320349",
     ];
 
     // Subscribe to market updates
-    let asset_refs: Vec<&str> = asset_ids.iter().map(|s| s.as_ref()).collect();
+    let asset_refs: Vec<&str> = asset_ids.to_vec();
     ws.subscribe(&asset_refs).await?;
 
     println!("Subscribed to {} assets", asset_ids.len());
@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
 
                     match message {
                         MarketWebSocketMessage::Book(book) => {
-                            println!("[{}] Book Update:", message_count);
+                            println!("[{message_count}] Book Update:");
                             println!("  Asset ID: {}", book.asset_id);
                             println!("  Market: {}", book.market);
                             println!("  Timestamp: {}", book.timestamp);
@@ -64,7 +64,7 @@ async fn main() -> anyhow::Result<()> {
                             println!();
                         }
                         MarketWebSocketMessage::PriceChange(price_change) => {
-                            println!("[{}] Price Change:", message_count);
+                            println!("[{message_count}] Price Change:");
                             println!("  Timestamp: {}", price_change.timestamp);
                             println!("  Changes: {}", price_change.price_changes.len());
                             println!("   Market: {}", price_change.market);
@@ -77,18 +77,18 @@ async fn main() -> anyhow::Result<()> {
                             println!();
                         }
                         MarketWebSocketMessage::LastTradePrice(trade) => {
-                            println!("[{}] Last Trade Price:", message_count);
+                            println!("[{message_count}] Last Trade Price:");
                             println!("  Asset ID: {}", trade.asset_id);
                             println!("  Market: {}", trade.market);
                             println!("  Timestamp: {}", trade.timestamp);
                             println!();
                         }
                         MarketWebSocketMessage::Unknown => {
-                            println!("[{}] Unknown message type", message_count);
+                            println!("[{message_count}] Unknown message type");
                             println!();
                         }
                         _ => {
-                            println!("[{}] Unhandled message type", message_count);
+                            println!("[{message_count}] Unhandled message type");
                             println!();
                         }
                     }
@@ -103,7 +103,7 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
             Err(e) => {
-                eprintln!("Error receiving message: {}", e);
+                eprintln!("Error receiving message: {e}");
             }
         }
     }
